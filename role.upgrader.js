@@ -2,13 +2,20 @@ var roleUpgrader = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-        creep.memory.StorageId = '57f1fc69c4cc49673c559fb2'
-        creep.memory.upgradeContainer = '57f0263b7ac830486d65d391'
+		if (!creep.memory.home){
+            var home = creep.room.name;
+            creep.memory.home = home;
+        }
+        // Go home
+        if (creep.room.name != creep.memory.home){
+            creep.meory.role1 = creep.memory.role;
+            creep.memory.role = "moveFlag"
+        }
 		if (!creep.memory.source) {
             var source = creep.pos.findClosestByRange(FIND_SOURCES);
 			creep.memory.source = source.id;
         }
-        var upgradeCan = Game.getObjectById(creep.memory.upgradeContainer);
+
         if(creep.memory.upgrading && creep.carry.energy == 0) {
             creep.memory.upgrading = false;
 	    }
@@ -28,20 +35,34 @@ var roleUpgrader = {
             //    creep.moveTo(creep.memory.controler)
             //}
         }
-        else {
-            if(creep.withdraw(upgradeCan, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-			    var source2 = Game.getObjectById(creep.memory.StorageId);
-			    if(creep.withdraw(source2, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-				    	creep.moveTo(source2);
-			    }
-			}
-		}
- //           if(creep.carry.energy < creep.carryCapacity) {
-//				var source = Game.getObjectById(creep.memory.source);
-//				if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
-//					creep.moveTo(source);
-//				}
-//        }
+	    else {
+	        // Kill the Useless FUCKS
+	        if (creep.ticksToLive < 50) {
+	           // creep.log("Bai Bai " + creep.ticksToLive)
+	            creep.suicide()
+	        }
+            //Harvest
+            if(creep.carry.energy < creep.carryCapacity) {
+				var source = Game.getObjectById(creep.memory.source);
+				if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
+					creep.moveTo(source);
+				}
+            //if(creep.harvest(creep.memory.source.pos) == ERR_NOT_IN_RANGE){
+            //    creep.moveTo(creep.memory.source.)
+            }
+        
+             //   if (creep.memory.source === null) {
+            //    creep.memory.source = creep.room.find(FIND_SOURCES);
+            //}
+            //if(creep.carry.energy < creep.carryCapacity) {
+            //    if(creep.harvest(creep.memory.source) == ERR_NOT_IN_RANGE){
+            //        creep.moveTo(creep.memory.source)
+            //    }
+            //}
+
+
+
+        }
 	}
 };
 

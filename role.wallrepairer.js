@@ -3,7 +3,15 @@ var roleBuilder = require('role.builder');
 module.exports = {
     // a function to run the logic for this role
     run: function(creep) {
-        creep.memory.StorageId = '57f1fc69c4cc49673c559fb2'
+        if (!creep.memory.home){
+            var home = creep.room.name;
+            creep.memory.home = home;
+        }
+        // Go home
+        if (creep.room.name != creep.memory.home){
+            creep.meory.role1 = creep.memory.role;
+            creep.memory.role = "moveFlag"
+        }
         // if creep is trying to repair something but has no energy left
         if (creep.memory.working == true && creep.carry.energy == 0) {
             // switch state
@@ -23,10 +31,11 @@ module.exports = {
         if (creep.memory.working == true) {
             // find all walls in the room
             var walls = creep.room.find(FIND_STRUCTURES, {
-                    filter: (s) => s.structureType == STRUCTURE_WALL|| s.structureType == STRUCTURE_RAMPART
+                    filter: (s) => s.structureType == STRUCTURE_WALL
         });
-
-            var target = undefined;
+            if (Game.time % 40 === 0) {
+                 var target = undefined;
+            }
 
             // loop with increasing percentages
             for (let percentage = 0.0001; percentage <= 1; percentage = percentage + 0.0001){
@@ -38,10 +47,18 @@ module.exports = {
                 // });
 
                 // so we have to use this
-                target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                        filter: (s) => s.structureType == STRUCTURE_WALL &&
-                    s.hits / s.hitsMax < percentage
-            });
+            //    target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+         //               filter: (s) => s.structureType == STRUCTURE_WALL &&
+         //           s.hits / s.hitsMax < percentage
+        //    });
+
+                for (let wall of walls) {
+                    if (wall.hits / wall.hitsMax < percentage) {
+                        target = wall;
+                        creep.say(target.id)
+                        break;
+                    }
+                }
 
                 // if there is one
                 if (target != undefined) {
@@ -66,14 +83,21 @@ module.exports = {
         }
         // if creep is supposed to harvest energy from source
         else {
-            
-            var source2 = Game.getObjectById(creep.memory.StorageId);
-			if(creep.withdraw(source2, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-				creep.moveTo(source2);
-			}
-            //var source = creep.pos.findClosestByPath(FIND_SOURCES, {
-             //       filter: (s) => s.energy > 0
+            // Kill the Useless FUCKS
+            if (creep.ticksToLive < 50) {
+               // creep.log("Bai Bai " + creep.ticksToLive)
+                creep.suicide()
+            }
+            //Harvest
+            // find closest source
+            var source = creep.pos.findClosestByPath(FIND_SOURCES, {
+                    filter: (s) => s.energy > 0
+        });
+            // try to harvest energy, if the source is not in range
+            if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                // move towards the source
+                creep.moveTo(source);
+            }
         }
-                    
     }
 };
